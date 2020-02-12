@@ -31,7 +31,8 @@
 #include "util/SophusUtil.h"
 
 #include "Tracking/Relocalizer.h"
-
+#include <stdio.h>           
+#include <time.h> 
 
 
 namespace lsd_slam
@@ -75,7 +76,7 @@ public:
 
 	void randomInit(uchar* image, double timeStamp, int id);
 	void gtDepthInit(uchar* image, float* depth, double timeStamp, int id);
-
+         
 	
 
 	// tracks a frame.

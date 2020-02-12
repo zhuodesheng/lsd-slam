@@ -478,7 +478,7 @@ UndistorterOpenCV::UndistorterOpenCV(const char* configFileName)
 		printf("Failed to read camera calibration (invalid format?)\nCalibration file: %s\n", configFileName);
 		valid = false;
 	}
-
+	printf("l3: %s\n",l3);
 	// l3
 	if(l3 == "crop")
 	{

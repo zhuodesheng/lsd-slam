@@ -35,8 +35,11 @@
 
 #include "util/Undistorter.h"
 #include <ros/package.h>
-
 #include "opencv2/opencv.hpp"
+#include <string>
+#include <stdio.h>           
+#include <time.h> 
+
 
 std::string &ltrim(std::string &s) {
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
@@ -215,12 +218,25 @@ int main( int argc, char** argv )
 
 	cv::Mat image = cv::Mat(h,w,CV_8U);
 	int runningIDX=0;
-	float fakeTimeStamp = 0;
-
+// 	float fakeTimeStamp = 0;
+	
+	/*std::vector<std::string> fileNames = dir.GetListFiles(source,".png",false);
+        std::vector<std::string> names*/;
+	
+        std::string image1 = files[0].c_str();
+	int num = image1.find_last_of("/");
+	int num1 = image1.find_last_of(".");
+	std::string str = image1.substr(num+1,num1-num);
+	std::stringstream s(str);
+	double fakeTimeStamp;
+	s >> fakeTimeStamp;
+	std::cout << fakeTimeStamp << std::endl;
+	
 	ros::Rate r(hz);
 
 	for(unsigned int i=0;i<files.size();i++)
 	{
+// 	        printf("fileName is : %s \n",files[i].c_str());
 		cv::Mat imageDist = cv::imread(files[i], CV_LOAD_IMAGE_GRAYSCALE);
 
 		if(imageDist.rows != h_inp || imageDist.cols != w_inp)
@@ -241,9 +257,22 @@ int main( int argc, char** argv )
 		if(runningIDX == 0)
 			system->randomInit(image.data, fakeTimeStamp, runningIDX);
 		else
+// 		        clock_t  beginTime ,endTime;
+// 		        clock_t time1;
+// 			time1 = clock();
 			system->trackFrame(image.data, runningIDX ,hz == 0,fakeTimeStamp);
+// 		        time = clock() -time;
+// 		        cout<<"time used:"<< (double)time / CLOCKS_PER_SEC << endl;
+		// 		        std::ofstream f;
+// 	                f.open("time.txt",std::ios::app);
+//                         f << std::fixed;
+// 		        f << (double)(endTime - startTime)/CLOCKS_PER_SEC << std::endl;
+// 		        f.close();
 		runningIDX++;
 		fakeTimeStamp+=0.03;
+		
+		
+
 
 		if(hz != 0)
 			r.sleep();

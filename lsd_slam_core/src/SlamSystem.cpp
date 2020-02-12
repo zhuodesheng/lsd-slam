@@ -45,9 +45,11 @@
 #endif
 
 #include "opencv2/opencv.hpp"
+#include <iostream>
+#include <fstream>
 
 using namespace lsd_slam;
-
+using namespace std;
 
 SlamSystem::SlamSystem(int w, int h, Eigen::Matrix3f K, bool enableSLAM)
 : SLAMEnabled(enableSLAM), relocalizer(w,h,K)
@@ -887,8 +889,11 @@ void SlamSystem::randomInit(uchar* image, double timeStamp, int id)
 
 }
 
+
 void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilMapped, double timestamp)
 {
+         clock_t time;
+	 time = clock();
 	// Create new frame
 	std::shared_ptr<Frame> trackingNewFrame(new Frame(frameID, width, height, K, timestamp, image));
 
@@ -922,6 +927,16 @@ void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilM
 	poseConsistencyMutex.lock_shared();
 	SE3 frameToReference_initialEstimate = se3FromSim3(
 			trackingReferencePose->getCamToWorld().inverse() * keyFrameGraph->allFramePoses.back()->getCamToWorld());
+	std::cout << std::endl << "Saving keyframe trajectory to " << "pose.txt" << " ..." << std::endl;
+	std::ofstream f;
+	f.open("pose.txt",std::ios::app);
+        f << std::fixed;
+// 	Eigen::Matrix<double, 3, 3> q = frameToReference_initialEstimate.rotationMatrix();
+	Eigen::Quaterniond q = frameToReference_initialEstimate.unit_quaternion();
+	Eigen::Vector3d t = frameToReference_initialEstimate.translation();
+	f << timestamp << " " << t[0] << " " << t[1] << " " << t[2] << " "<< q.x() << " " << q.y() << " " << q.z() << " " << q.w() 
+	  << std::endl; 
+	f.close();
 	poseConsistencyMutex.unlock_shared();
 
 
@@ -1037,6 +1052,13 @@ void SlamSystem::trackFrame(uchar* image, unsigned int frameID, bool blockUntilM
 		}
 		lock.unlock();
 	}
+	time =  clock() - time;
+	ofstream ff;
+	cout<<"time used:"<< (double)time / CLOCKS_PER_SEC << endl;
+	ff.open("trackTime.txt",std::ios::app);
+        ff << std::fixed;
+	ff << (double)time/CLOCKS_PER_SEC << std::endl;
+        ff.close();
 }
 
 
